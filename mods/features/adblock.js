@@ -299,7 +299,13 @@ function processShelves(shelves, shouldAddPreviews = true) {
         addPreviews(shelve.shelfRenderer.content.horizontalListRenderer.items);
       }
       shelve.shelfRenderer.content.horizontalListRenderer.items = hideVideo(shelve.shelfRenderer.content.horizontalListRenderer.items);
-      if (!configRead('enableShorts')) {
+     if (
+    !configRead('enableShorts') ||
+  (
+    configRead('familyKidsMode') &&
+    configRead('familyRemoveShorts')
+  )
+) {
         if (shelve.shelfRenderer.tvhtml5ShelfRendererType === 'TVHTML5_SHELF_RENDERER_TYPE_SHORTS') {
           shelves.splice(shelves.indexOf(shelve), 1);
           continue;
