@@ -63,6 +63,12 @@ const defaultConfig = {
   enableClock: false,
   isClock12HourFormat: false,
   clockShowSeconds: false,
+  familyKidsMode: false,
+  familyBlockedKeywords: ['blippi'],
+  familyBlockedChannelIds: [],
+  familyBlockedVideoIds: [],
+  familyRemoveShorts: true,
+  familyDisableAutoplay: true,
 };
 
 let localConfig;
