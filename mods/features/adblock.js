@@ -433,18 +433,71 @@ function addLongPress(items) {
   }
 }
 
+function normalizeFamilyText(value) {
+  return String(value || '')
+    .normalize('NFKD')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function hideVideo(items) {
   return items.filter(item => {
     if (!item.tileRenderer) return true;
-    const progressBar = item.tileRenderer.header?.tileHeaderRenderer?.thumbnailOverlays?.find(overlay => overlay.thumbnailOverlayResumePlaybackRenderer)?.thumbnailOverlayResumePlaybackRenderer;
+
+    if (configRead('familyKidsMode')) {
+      const title =
+        item.tileRenderer.metadata?.tileMetadataRenderer?.title?.simpleText ||
+        item.tileRenderer.metadata?.tileMetadataRenderer?.title?.runs?.map(run => run.text).join(' ') ||
+        '';
+
+      const subtitleNode =
+        item.tileRenderer.metadata?.tileMetadataRenderer?.lines?.[0]
+          ?.lineRenderer?.items?.[0]?.lineItemRenderer?.text;
+
+      const subtitle =
+        subtitleNode?.simpleText ||
+        subtitleNode?.runs?.map(run => run.text).join(' ') ||
+        '';
+
+      const searchableText = normalizeFamilyText(`${title} ${subtitle}`);
+
+      const blockedKeywords = configRead('familyBlockedKeywords') || [];
+
+      const matchesBlockedKeyword = blockedKeywords.some(keyword => {
+        const normalizedKeyword = normalizeFamilyText(keyword);
+        return normalizedKeyword && searchableText.includes(normalizedKeyword);
+      });
+
+      if (matchesBlockedKeyword) {
+        return false;
+      }
+    }
+
+    const progressBar =
+      item.tileRenderer.header?.tileHeaderRenderer?.thumbnailOverlays
+        ?.find(overlay => overlay.thumbnailOverlayResumePlaybackRenderer)
+        ?.thumbnailOverlayResumePlaybackRenderer;
+
     if (!progressBar) return true;
+
     const pages = configRead('hideWatchedVideosPages');
     if (!pages.length) return true;
+
     const hash = location.hash.substring(1);
-    const pageName = hash === '/' ? 'home' : hash.startsWith('/search') ? 'search' : hash.split('?')[1]?.split('&')[0]?.split('=')[1]?.replace('FE', '')?.replace('topics_', '') ?? '';
+    const pageName =
+      hash === '/'
+        ? 'home'
+        : hash.startsWith('/search')
+          ? 'search'
+          : hash.split('?')[1]?.split('&')[0]?.split('=')[1]
+            ?.replace('FE', '')
+            ?.replace('topics_', '') ?? '';
+
     if (!pages.includes(pageName)) return true;
 
-    const percentWatched = (progressBar.percentDurationWatched || 0);
+    const percentWatched = progressBar.percentDurationWatched || 0;
     return percentWatched <= configRead('hideWatchedVideosThreshold');
   });
 }
