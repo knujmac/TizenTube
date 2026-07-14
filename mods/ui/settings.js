@@ -88,6 +88,11 @@ export default function modernUI(update, parameters) {
             })
         },
         {
+            name: 'Kids Mode',
+            icon: 'ACCOUNT_CIRCLE',
+            value: 'familyKidsMode'
+        },
+        {
             name: t('settings.options.adBlock'),
             icon: 'DOLLAR_SIGN',
             value: 'enableAdBlock'
