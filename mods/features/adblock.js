@@ -447,6 +447,28 @@ function hideVideo(items) {
     if (!item.tileRenderer) return true;
 
     if (configRead('familyKidsMode')) {
+      const videoId =
+        item.tileRenderer.contentId ||
+        item.tileRenderer.onSelectCommand?.watchEndpoint?.videoId ||
+        '';
+
+      const channelId =
+        item.tileRenderer.metadata?.tileMetadataRenderer?.lines?.[0]
+          ?.lineRenderer?.items?.[0]?.lineItemRenderer?.navigationEndpoint
+          ?.browseEndpoint?.browseId ||
+        '';
+
+      const blockedVideoIds = configRead('familyBlockedVideoIds') || [];
+      const blockedChannelIds = configRead('familyBlockedChannelIds') || [];
+
+      if (blockedVideoIds.includes(videoId)) {
+        return false;
+      }
+
+      if (blockedChannelIds.includes(channelId)) {
+        return false;
+      }
+
       const title =
         item.tileRenderer.metadata?.tileMetadataRenderer?.title?.simpleText ||
         item.tileRenderer.metadata?.tileMetadataRenderer?.title?.runs?.map(run => run.text).join(' ') ||
