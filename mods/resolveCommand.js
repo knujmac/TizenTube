@@ -124,6 +124,14 @@ export function patchResolveCommand() {
                         );
                     }
                 } else if (cmd?.watchEndpoint?.videoId) {
+                    if (configRead('familyKidsMode')) {
+                        const blockedVideoIds = configRead('familyBlockedVideoIds') || [];
+                        if (blockedVideoIds.includes(cmd.watchEndpoint.videoId)) {
+                            showToast('Family Controls', 'This video is blocked in Kids Mode.');
+                            return true;
+                        }
+                    }
+
                     window.isPipPlaying = false;
                     const ytlrPlayerContainer = document.querySelector('ytlr-player-container');
                     ytlrPlayerContainer.style.removeProperty('z-index');
